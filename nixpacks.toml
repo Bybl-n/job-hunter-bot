@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["chromium", "chromedriver"]
+aptPkgs = ["chromium-driver", "chromium"]
 
 [start]
 cmd = "python main.py"
