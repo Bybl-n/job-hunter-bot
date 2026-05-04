@@ -12,6 +12,9 @@ from bs4 import BeautifulSoup
 from config import SEARCH_QUERIES, CITY_ID
 
 def create_driver():
+    import shutil
+    import platform
+    
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
@@ -20,14 +23,30 @@ def create_driver():
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-    options.binary_location = "/usr/bin/chromium"
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
 
-    driver = webdriver.Chrome(
-        service=Service("/usr/bin/chromedriver"),
-        options=options
-    )
+    # Определяем окружение
+    is_docker = os.path.exists("/.dockerenv")
+    
+    if is_docker:
+        # В Docker пути фиксированные
+        options.binary_location = "/usr/bin/chromium"
+        service = Service("/usr/bin/chromedriver")
+    else:
+        # Локально — автопоиск или ChromeDriverManager
+        chromium_path = shutil.which("chromium") or shutil.which("chromium-browser") or shutil.which("google-chrome")
+        chromedriver_path = shutil.which("chromedriver")
+        
+        if chromium_path:
+            options.binary_location = chromium_path
+        
+        if chromedriver_path:
+            service = Service(chromedriver_path)
+        else:
+            service = Service(ChromeDriverManager().install())
+
+    driver = webdriver.Chrome(service=service, options=options)
 
     driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
         "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
