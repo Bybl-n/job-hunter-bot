@@ -1,5 +1,0 @@
-[phases.setup]
-aptPkgs = ["chromium-driver", "chromium"]
-
-[start]
-cmd = "python main.py"
