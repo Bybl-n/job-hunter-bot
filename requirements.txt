@@ -1,0 +1,7 @@
+selenium
+webdriver-manager
+beautifulsoup4
+requests
+python-telegram-bot
+schedule
+python-dotenv
